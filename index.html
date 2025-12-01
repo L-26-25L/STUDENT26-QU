@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Grades Dashboard</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Google font -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+  canvas { direction: ltr !important; }  /* مهم جداً عشان الرسوم تشتغل */
+</style>
+
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-title">blackboard</div>
+      <div class="brand-sub">My Grades</div>
+    </div>
+
+    <button id="btnMyGrade" class="menu-item active">
+      <span class="menu-dot gold"></span> My Grade
+    </button>
+
+    <div id="coursesList" class="courses-list"></div>
+
+    <div class="actions">
+      <button id="exportBtn" class="small-btn">Export</button>
+      <button id="importBtn" class="small-btn">Import</button>
+      <button id="clearBtn" class="small-btn danger">Clear</button>
+      <input id="importFile" type="file" accept="application/json" style="display:none;">
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page-section">
+      <header class="page-header">
+        <h1>Dashboard Summary</h1>
+        <div class="header-desc">Best quizzes, course comparison, and term work</div>
+      </header>
+
+      <div class="top-grid">
+
+        <div class="card big">
+          <div class="card-title">Best Quizzes</div>
+          <canvas id="bestQuizzesChart"></canvas>
+        </div>
+
+        <div class="card small">
+          <div class="card-title">Courses Comparison (%)</div>
+          <canvas id="compareChart"></canvas>
+        </div>
+
+        <div class="card small ap-card">
+          <div class="card-title">A+ Gap</div>
+          <div id="aplusCard" class="aplus-content">
+            <div id="aplusPercent" class="aplus-number">--%</div>
+            <div id="aplusGap" class="aplus-text">--%</div>
+          </div>
+        </div>
+
+        <div class="card small">
+          <div class="card-title">Term Work Avg %</div>
+          <div id="termWorkValue" class="term-number">--%</div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- COURSE PAGE -->
+    <section id="courseSection" class="page-section hidden">
+
+      <div class="course-header">
+        <button id="backToDash" class="small-btn">Back</button>
+        <div>
+          <h2 id="courseTitle">Course Name</h2>
+          <div class="header-desc">Editable grade distribution</div>
+        </div>
+
+        <div class="course-actions">
+          <button id="calcCourse" class="btn">Calculate %</button>
+          <button id="saveCourse" class="small-btn">Save</button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <table id="courseTable">
+          <thead>
+            <tr>
+              <th>Assessment</th>
+              <th>Item</th>
+              <th>Total</th>
+              <th>Obtained</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="course-footer">
+        <div class="summary card">
+          <div>Term Work: <strong id="courseTermWork">--</strong></div>
+          <div>Total Percentage: <strong id="coursePercent">--%</strong></div>
+          <div id="courseAPlusNote">--</div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
