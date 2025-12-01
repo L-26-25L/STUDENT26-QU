@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grades Dashboard</title>
+<style>
+:root{
+  --bg:#eceaf4;
+  --sidebar-dark:#3e3550;
+  --sidebar-light:#57466a;
+  --gold:#caa32b;
+  --card:#ffffff;
+  --muted:#6b6b7a;
+  --accent:#4a7ec6;
+  --table-accent:#6a4f6f;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:'Noto Naskh Arabic', serif;background:var(--bg);color:#111}
+.app{display:flex;min-height:100vh}
+.sidebar{width:240px;background:linear-gradient(180deg,var(--sidebar-dark),var(--sidebar-light));padding:18px;color:#fff}
+.brand{margin-bottom:12px}
+.brand-title{font-weight:700;font-size:18px;text-transform:lowercase}
+.brand-sub{color:var(--gold);font-weight:700;margin-top:6px}
+.courses-list{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.course-btn{padding:8px 10px;background:transparent;border-radius:6px;border:none;color:#fff;text-align:right;cursor:pointer}
+.course-btn:hover{background:rgba(255,255,255,0.03)}
+.actions{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.small-btn{padding:6px 8px;border-radius:6px;border:none;cursor:pointer;background:#fff;color:#333}
+.small-btn.danger{background:#ff6b6b;color:#fff}
+.main{flex:1;padding:20px}
+.page-header h1{margin:0;font-size:20px}
+.header-desc{color:var(--muted);font-size:13px;margin-top:6px}
+.top-grid{display:grid;grid-template-columns:2fr 1fr 220px 220px;gap:14px;margin-top:16px}
+.card{background:var(--card);border-radius:10px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.card-title{color:var(--muted);font-size:13px;margin-bottom:10px}
+.big{min-height:260px}
+.small{min-height:160px}
+.ap-card{display:flex;flex-direction:column;justify-content:center;align-items:center}
+.aplus-content{padding:8px;border-radius:8px;color:#fff;width:100%;text-align:center}
+.aplus-number{font-size:28px;font-weight:700}
+.aplus-text{font-size:13px;color:rgba(255,255,255,0.9)}
+.term-number{font-weight:700;color:var(--accent);font-size:20px}
+.hidden{display:none}
+.course-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.course-header h2{margin:0}
+.course-actions{display:flex;gap:8px;align-items:center}
+.btn{padding:8px 12px;border-radius:8px;border:none;background:var(--sidebar-dark);color:#fff;cursor:pointer}
+.table-card{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{background:linear-gradient(90deg,var(--table-accent),#8b6aa0);color:#fff;font-weight:600;padding:10px;text-align:center}
+th,td{border:1px solid rgba(0,0,0,0.06);padding:8px;text-align:center;background:rgba(255,255,255,0.95)}
+td[contenteditable="true"]{background:#fffbe6}
+.summary{margin-top:12px;padding:12px}
+@media(max-width:980px){
+  .top-grid{grid-template-columns:1fr;gap:12px}
+  .sidebar{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-title">blackboard</div>
+      <div class="brand-sub">My Grades</div>
+    </div>
+    <div id="coursesList" class="courses-list"></div>
+    <div class="actions">
+      <button id="clearBtn" class="small-btn danger">Clear</button>
+    </div>
+  </aside>
+  <main class="main">
+    <section id="dashboard" class="page-section">
+      <header class="page-header">
+        <h1>Dashboard Summary</h1>
+        <div class="header-desc">Best quizzes, course comparison, and term work</div>
+      </header>
+      <div class="top-grid">
+        <div class="card big">
+          <div class="card-title">Best Quizzes</div>
+          <canvas id="bestQuizzesChart"></canvas>
+        </div>
+        <div class="card small">
+          <div class="card-title">Courses Comparison (%)</div>
+          <canvas id="compareChart"></canvas>
+        </div>
+        <div class="card small ap-card">
+          <div class="card-title">A+ Gap</div>
+          <div id="aplusCard" class="aplus-content">
+            <div id="aplusPercent" class="aplus-number">--%</div>
+            <div id="aplusGap" class="aplus-text">--%</div>
+          </div>
+        </div>
+        <div class="card small">
+          <div class="card-title">Term Work Avg %</div>
+          <div id="termWorkValue" class="term-number">--%</div>
+        </div>
+      </div>
+    </section>
+    <section id="courseSection" class="page-section hidden">
+      <div class="course-header">
+        <button id="backToDash" class="small-btn">Back</button>
+        <div>
+          <h2 id="courseTitle">Course Name</h2>
+          <div class="header-desc">Editable grade distribution</div>
+        </div>
+      </div>
+      <div class="card table-card">
+        <table id="courseTable">
+          <thead>
+            <tr>
+              <th>Assessment</th>
+              <th>Item</th>
+              <th>Total</th>
+              <th>Obtained</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="course-footer">
+        <div class="summary card">
+          <div>Term Work: <strong id="courseTermWork">--</strong></div>
+          <div>Total Percentage: <strong id="coursePercent">--%</strong></div>
+          <div id="courseAPlusNote">--</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const STORAGE_KEY = 'lina_grades_v1';
+const DEFAULT = {
+  aPlusThreshold: 90,
+  courses:[
+    {id:'economy', name:'Economy', items:[
+      {type:'Quiz', name:'Quiz 1', max:5, val:4.25},
+      {type:'Quiz', name:'Quiz 2', max:5, val:4.5},
+      {type:'Quiz', name:'Quiz 3', max:5, val:5},
+      {type:'Quiz', name:'Quiz 4', max:5, val:0},
+      {type:'Quiz', name:'Quiz 5', max:5, val:0},
+      {type:'Midterm', name:'Midterm 1', max:15, val:14.5},
+      {type:'Midterm', name:'Midterm 2', max:15, val:14.5},
+      {type:'Final', name:'Final', max:50, val:0}
+    ]},
+    {id:'math', name:'Math', items:[
+      {type:'Quiz', name:'Quiz 1', max:10, val:10},
+      {type:'Quiz', name:'Quiz 2', max:10, val:10},
+      {type:'Quiz', name:'Quiz 3', max:10, val:0},
+      {type:'Midterm', name:'Midterm', max:25, val:24},
+      {type:'Activity', name:'Activities', max:5, val:5},
+      {type:'Final', name:'Final', max:50, val:0}
+    ]}
+  ]
+};
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || JSON.parse(JSON.stringify(DEFAULT));
+
+const coursesList = document.getElementById('coursesList');
+const dashboard = document.getElementById('dashboard');
+const courseSection = document.getElementById('courseSection');
+const courseTitle = document.getElementById('courseTitle');
+const courseTableBody = document.querySelector('#courseTable tbody');
+const backToDash = document.getElementById('backToDash');
+const termWorkValue = document.getElementById('termWorkValue');
+const aplusPercent = document.getElementById('aplusPercent');
+const aplusGap = document.getElementById('aplusGap');
+let bestChart, compareChart;
+function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}
+function renderSidebar(){
+  coursesList.innerHTML='';
+  state.courses.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='course-btn';
+    btn.innerHTML=<span style="font-weight:600">${c.name}</span>;
+    btn.onclick=()=>onCourseClick(c.id);
+    coursesList.appendChild(btn);
+  });
+}
+function renderDashboard(){
+  const labels = state.courses.map(c=>c.name);
+  const bestData = state.courses.map(c=>{
+    const quizzes = c.items.filter(i=>i.type==='Quiz').map(q=>parseFloat(q.val||0));
+    if(quizzes.length<=1) return quizzes.reduce((s,x)=>s+x,0);
+    const sorted = quizzes.slice().sort((a,b)=>b-a);
+    const take = sorted.slice(0, quizzes.length-1);
+    return take.reduce((s,x)=>s+x,0);
+  });
+  const compareData = state.courses.map(c=>{
+    return computeMeasuresForCourse(c).percent;
+  });
+  termWorkValue.innerText=computeAverageTermPercent().toFixed(1)+'%';
+  const aplusInfo=computeAPlus();
+  aplusPercent.innerText=(100-aplusInfo.minGap).toFixed(1)+'%';
+  aplusGap.innerText=${aplusInfo.minGap.toFixed(1)}% نقص عن ${state.aPlusThreshold}%;
+  const apCard=document.getElementById('aplusCard');
+  const apVal=100-aplusInfo.minGap;
+  if(apVal>=state.aPlusThreshold) apCard.style.background='linear-gradient(90deg,#caa32b,#e6d28a)';
+  else if(apVal>=state.aPlusThreshold-6) apCard.style.background='linear-gradient(90deg,#ffd86b,#ffc107)';
+  else apCard.style.background='linear-gradient(90deg,#7fcf7f,#3fb76e)';
+
+  if(!bestChart){
+    const ctx=document.getElementById('bestQuizzesChart').getContext('2d');
+    bestChart=new Chart(ctx,{type:'pie',data:{labels:labels,datasets:[{data:bestData,backgroundColor:generateColors(labels.length)}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+  }else{bestChart.data.labels=labels;bestChart.data.datasets[0].data=bestData;bestChart.update();}
+  if(!compareChart){
+    const ctx2=document.getElementById('compareChart').getContext('2d');
+    compareChart=new Chart(ctx2,{type:'bar',data:{labels:labels,datasets:[{data:compareData,backgroundColor:generateColors(labels.length)}]},options:{indexAxis:'y',responsive:true,scales:{x:{beginAtZero:true,max:100}}}});
+  }else{compareChart.data.labels=labels;compareChart.data.datasets[0].data=compareData;compareChart.update();}
+  saveState();
+}
+
+function onCourseClick(courseId){
+  const course=state.courses.find(c=>c.id===courseId);
+  if(!course) return;
+  courseTitle.innerText=course.name;
+  courseTableBody.innerHTML='';
+  course.items.forEach(it=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=<td>${it.type}</td><td>${it.name}</td><td>${it.max}</td><td contenteditable="true">${it.val!==undefined?it.val:''}</td>;
+    tr.querySelector('td[contenteditable]').oninput=()=>{it.val=parseFloat(tr.querySelector('td[contenteditable]').innerText)||0; renderDashboard(); updateCourseSummary();};
+    courseTableBody.appendChild(tr);
+  });
+  dashboard.classList.add('hidden');
+  courseSection.classList.remove('hidden');
+  updateCourseSummary();
+}
+backToDash.onclick=()=>{dashboard.classList.remove('hidden'); courseSection.classList.add('hidden'); renderDashboard();};
+document.getElementById('clearBtn').onclick=()=>{if(confirm('تأكيد مسح البيانات المحلية؟')){localStorage.removeItem(STORAGE_KEY); state=JSON.parse(JSON.stringify(DEFAULT)); renderSidebar(); renderDashboard();}};
+
+function computeMeasuresForCourse(course){
+  const quizzes = course.items.filter(i=>i.type==='Quiz').map(q=>parseFloat(q.val||0));
+  let sumTopQuizzes=0;
+  if(quizzes.length<=1) sumTopQuizzes=quizzes.reduce((s,x)=>s+x,0);
+  else sumTopQuizzes=quizzes.slice().sort((a,b)=>b-a).slice(0,quizzes.length-1).reduce((s,x)=>s+x,0);
+  const mids = course.items.filter(i=>['Midterm','Report','Activity'].includes(i.type)).map(x=>parseFloat(x.val||0));
+  const sumMids = mids.reduce((s,x)=>s+x,0);
+  const finalSum = course.items.filter(i=>i.type==='Final').map(x=>parseFloat(x.val||0)).reduce((s,x)=>s+x,0);
+  const quizzesMax = course.items.filter(i=>i.type==='Quiz').map(q=>q.max);
+  let countedMax = quizzesMax.length<=1? quizzesMax.reduce((s,x)=>s+x,0) : quizzesMax.slice().sort((a,b)=>b-a).slice(0,quizzesMax.length-1).reduce((s,x)=>s+x,0);
+  const midMax = course.items.filter(i=>i.type==='Midterm').map(q=>q.max).reduce((s,x)=>s+x,0);
+  const repMax = course.items.filter(i=>i.type==='Report').map(q=>q.max).reduce((s,x)=>s+x,0);
+  const actMax = course.items.filter(i=>i.type==='Activity').map(q=>q.max).reduce((s,x)=>s+x,0);
+  const finalMax = course.items.filter(i=>i.type==='Final').map(q=>q.max).reduce((s,x)=>s+x,0);
+  const termWorkValue = sumTopQuizzes+sumMids;
+  const termMax = countedMax+midMax+repMax+actMax;
+  const totalObtained = termWorkValue+finalSum;
+  const totalMax = termMax+finalMax;
+  const percent = totalMax>0? (totalObtained/totalMax)*100 :0;
+  const termPercent = termMax>0? (termWorkValue/termMax)*100 :0;
+  return {sumTopQuizzes, termWorkValue, totalObtained, totalMax, percent, termPercent};
+}
+
+function updateCourseSummary(showAlert){
+  const course = state.courses.find(c=>c.name===courseTitle.innerText);
+  if(!course) return;
+  const res = computeMeasuresForCourse(course);
+  document.getElementById('courseTermWork').innerText=res.termWorkValue.toFixed(2)+' نقطة';
+  document.getElementById('coursePercent').innerText=res.percent.toFixed(1)+'%';
+  const gap=Math.max(0,state.aPlusThreshold-res.percent);
+  const note = document.getElementById('courseAPlusNote');
+  note.innerText=نقص ${gap.toFixed(1)}% للوصول إلى ${state.aPlusThreshold}% (A+);
+  if(showAlert) alert(النسبة للمقرر ${course.name} = ${res.percent.toFixed(1)}%);
+  renderDashboard();
+}
+
+function computeAverageTermPercent(){
+  const arr=state.courses.map(c=>computeMeasuresForCourse(c).termPercent);
+  const sum=arr.reduce((s,x)=>s+x,0);
+  return arr.length? sum/arr.length :0;
+}
+
+function computeAPlus(){
+  let minGap=Infinity;
+  state.courses.forEach(c=>{
+    const p=computeMeasuresForCourse(c).percent;
+    const gap=Math.max(0,state.aPlusThreshold-p);
+    if(gap<minGap) minGap=gap;
+  });
+  return {minGap};
+}
+
+function generateColors(n){
+  const palette=['#4a7ec6','#6a4f6f','#caa32b','#7f3fb7','#3fb76e','#ffb86b','#4fb0b0','#8b5cf6'];
+  return Array.from({length:n},(_,i)=>palette[i%palette.length]);
+}
+
+renderSidebar();
+renderDashboard();
+</script>
+</body>
